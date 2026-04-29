@@ -30,12 +30,10 @@ let analyze = 1;
 let result = 2; 
 let aura = 3; 
 let state = start; 
-
 // timer for the analyzing state
 let timerStart = 0;
 let timerDuration = 120; 
 let loadingBarProgress = 0; 
-
 // sidebar + widget info 
 let sidebarWidth = 250; 
 let smWidgetWidth = 60;
@@ -44,7 +42,6 @@ let widgetCornerRadi = 5;
 let centeredX;
 let sidebar;
 let auraBtn, like, love, dislike, startBtn, generateBtn; 
-
 //Undertone detection variables
 let forehead = [54,103,67,109,10,338,297,332,284,298,333,299,337,9,108,69,104,68];
 let lCheek = [147,123,116,111,228,229,230,231,121,47,126,142,203,206,207,187];
@@ -54,10 +51,8 @@ let smoothColor = { r: 0, g: 0, b: 0 };
 let smoothConfidence = 0;
 
 let currentResult = { primary: "Analyzing...", runnerUp: "", confidence: 0};
-
 //storage for palettes 
 let currentPalette = []; 
-
 //season categories, with base starter color and identity features 
 const SEASONS = {
   "Bright Spring 🌼": {base: "#FFB347", temp: 1, value: 0.8, chroma: 0.9, contrast: 0.6},
@@ -76,7 +71,117 @@ const SEASONS = {
   "Bright Winter 🌟": { base: "#00AEEF", temp: -1, value: 0.6, chroma: 1.0, contrast: 0.9 },
   "True Winter 🧊": { base: "#4682B4", temp: -1, value: 0.4, chroma: 0.9, contrast: 0.7}
 };
+const SEASON_PALETTES = {
 
+  // 🌼 SPRING (warm + clear)
+  "Bright Spring 🌼": [
+    "#FF6F61", "#FF9A3C", "#FFD166",
+    "#A8E063", "#00C49A", "#00AEEF",
+    "#FF5E78", "#FFA07A", "#F4E04D",
+    "#7ED957", "#2EC4B6", "#4CC9F0"
+  ],
+
+  "Light Spring 🌸": [
+    "#FFD1DC", "#FFB7B2", "#FFE4A1",
+    "#FFF3B0", "#C1E1C1", "#A0D6B4",
+    "#FADADD", "#F6C1C1", "#FFE8A3",
+    "#E6F2C2", "#BDE0C4", "#CDEDF6"
+  ],
+
+  "True Spring 🌻": [
+    "#FFA500", "#FF7F50", "#FFD700",
+    "#9ACD32", "#3CB371", "#20B2AA",
+    "#FF8C00", "#FF6347", "#FFEA00",
+    "#7FFF00", "#2ECC71", "#40E0D0"
+  ],
+
+  // 🍂 AUTUMN (warm + muted/deep)
+  "Soft Autumn 🍂": [
+    "#568F91","#405E5C","#BAB696",
+  "#E1DBC9","#437D6D","#DED7C8",
+  "#7BB5A3", "#F0EBD7","#C3BDAB","#8EC5B6"
+  ],
+
+  "True Autumn 🌰": [
+    "#A0522D", "#CD853F", "#D2691E",
+    "#8B4513", "#DEB887", "#704214",
+    "#8C4A2F", "#C17A4D", "#E08A2E",
+    "#6E3B1F", "#C9A66B", "#5A381E"
+  ],
+
+  "Deep Autumn 🍁": [
+    "#8B4000", "#5A2A00", "#A0522D",
+    "#3B2F2F", "#556B2F", "#6B4226",
+    "#7A3300", "#4B1F00", "#7F4F24",
+    "#2F1B1B", "#4F6228", "#5C3A21"
+  ],
+
+  // 🌷 SUMMER (cool + soft/light)
+  "Light Summer 🌷": [
+    "#E6A8D7", "#F8C8DC", "#D8BFD8",
+    "#B0C4DE", "#ADD8E6", "#C3B1E1",
+    "#E8B4E3", "#F2D1DC", "#DCD0FF",
+    "#C7D3E3", "#BFD7EA", "#D6C3F0"
+  ],
+
+  "Soft Summer 🌫️": [
+    "#B0C4DE", "#A8B5C0", "#C1C8E4",
+    "#8F9AA3", "#9FB6CD", "#7A8FA6",
+    "#AAB7C4", "#95A3B3", "#B8C2CC",
+    "#7E8A94", "#8FA6BF", "#6F849B"
+  ],
+
+  "True Summer 💐": [
+    "#7FB3D5", "#6495ED", "#5F9EA0",
+    "#87CEEB", "#6CA6CD", "#4682B4",
+    "#6FAED6", "#5B8FD9", "#5DA5A4",
+    "#78BFE8", "#5E99C7", "#3F6FA0"
+  ],
+
+  // ❄️ WINTER (cool + high contrast)
+  "Bright Winter 🌟": [
+    "#e6decf", "#aba798", "#827e7c",
+    "#726f70", "#f2e6b1", "#f7d1d1",
+    "#b8e2dc", "#f5d6e6", "#bfb4cb",
+    "#ec8b8d", "#d94f71", "#d2386c",
+    "#a32857", "#7c2946", "#d4367a",
+    "#ca4286", "#c0428a", "#ab3475",
+    "#8c3573", "#707bb4", "#5a5b9f",
+    "#333e83", "#5b7ebd", "#3950a0", 
+    "#5cc8d7", "#009499","#2da8d8", 
+    "#0084bd", "#00698b", "#2b3042", 
+    "#45413c", "#4e4b51", "#373838","#28282d"
+
+  ],
+
+  "True Winter 🧊": [
+    "#B4E8EC", "#F3D4DF", "#D2CFC4",
+    "#E2E2DA", "#95908B", "#73706F",
+    "#EDF1FF", "#BDC6DC", "#EEEA97",
+    "#BCD9C8", "#823270", "#F1A6CC",
+    "#DE9BC4", "#B73275", "#C180B5",
+    "#AC5D98", "#EDBEDC", "#642B60",
+    "#DA6CA1", "#92316F", "#23305B",
+    "#2A6A8B", "#15A3C7", "#0B6F69",
+    "#4A5FA5", "#203C7F", "#6E81BE",
+    "#252A48", "#009B8C", "#27535A",
+    "#392C2B", "#403F6F", "#544275",
+    "#4E3E3A", "#252A48"
+  ],
+
+  "Deep Winter ❄️": [
+    "#2A2B2D", "#40A48E", "#006E52",
+    "#194B46", "#1E3A3C", "#1F2C43",
+    "#69BBDD", "#1578A7", "#104E67",
+    "#266691", "#502E55", "#B085B7",
+    "#634177", "#262735", "#9469A2",
+    "#5D2935", "#B31B38", "#9F2436",
+    "#8A2232", "#77202F", "#C43362",
+    "#FB90A2", "#CE3D66", "#962D49",
+    "#CF5C78", "#BAB8D3","#F0E79D", 
+    "#BAE5D6","#B4DCEA", "#9C9B98",
+     "#F4F7FF", "#CAC2B9","#6C6868", "#DFDDD7"]
+};
 // PRELOAD, SETUP, AND DRAW LOOPS 
 
 // preload function to enable the faceMesh features 
@@ -96,9 +201,9 @@ function setup() {
     sidebar = new SidebarUI(sidebarWidth);
     centeredX = sidebar.getCenterX();
 
-    like = new SmallWidgetUI (centeredX +200, height - 100, "👍"); 
-    love = new SmallWidgetUI (centeredX , height - 100, "❤️"); 
-    dislike = new SmallWidgetUI (centeredX + 200, height - 100, "👎"); 
+    like = new SmallWidgetUI (centeredX +200, height - 150, "👍"); 
+    love = new SmallWidgetUI (centeredX , height - 150, "❤️"); 
+    dislike = new SmallWidgetUI (centeredX + 200, height - 150, "👎"); 
 
     startBtn = new LongWidgetUI(centeredX, 200, "Start!"); 
     generateBtn = new LongWidgetUI(centeredX, 100, "Generate"); 
@@ -202,37 +307,19 @@ function classifySeason(features) {
 
 // Creating Palettes
 function generatePalette(seasonName) {
-  let s = SEASONS[seasonName];
-  let base = chroma(s.base);
+  let palette = SEASON_PALETTES[seasonName];
+  if (!palette) return [];
 
-let contrastRange = map(s.contrast, 0, 1, 5, 25);
+  // pick 6 random colors
+  let selected = shuffle([...palette]).slice(0, 6);
 
-let jitterLight = random(-contrastRange, contrastRange);
-let jitterDark = random(-contrastRange, contrastRange);
+  // optional: slight variation so it doesn’t feel static
+  selected = selected.map(c =>
+    chroma(c).saturate(random(-0.15, 0.15)).hex()
+  );
 
-  let lightL = constrain(s.value * 100 + 20 + jitterLight, 0, 100);
-  let darkL  = constrain(s.value * 100 - 20 + jitterDark, 0, 100);
-
-  let scale = chroma.scale([
-    base.set('lch.l', lightL),
-    base,
-    base.set('lch.l', darkL)
-  ])
-  .mode('lch')
-  .correctLightness();
-
-  let colors = scale.colors(6);
-
-  // 🎨 chroma shaping (with slight randomness too 👀)
-  colors = colors.map(c => {
-    let chromaJitter = random(-0.2, 0.2);
-    return chroma(c)
-      .saturate((s.chroma - 0.5) * 2 + chromaJitter)
-      .hex();
-  });
-
-  return colors;
-} // given the first season given to user, it generates a compatible palette for the user
+  return selected;
+}// given the first season given to user, it generates a compatible palette for the user
 
 // Color Analysis
 function runColorAnalysis() {
@@ -348,15 +435,26 @@ function drawPalette(colors) {
   if (!colors || colors.length === 0) return;
 
   let boxSize = 45;
-  let spacing = 5;
+  let spacing = 8;
 
-  let totalWidth = colors.length * (boxSize + spacing);
-  let startX = centeredX - totalWidth / 2;
-  let y = 430;
+  let cols = 3;
+  let rows = 2;
+
+  let totalWidth = cols * (boxSize + spacing);
+  let totalHeight = rows * (boxSize + spacing);
+
+  let startX = sidebar.getCenterX() -50;
+  let startY = 500;
 
   for (let i = 0; i < colors.length; i++) {
+    let col = i % cols;
+    let row = floor(i / cols);
+
+    let x = startX + col * (boxSize + spacing);
+    let y = startY + row * (boxSize + spacing);
+
     fill(colors[i]);
-    rect(startX + i * (boxSize + spacing), y, boxSize, boxSize, 8);
+    rect(x, y, boxSize, boxSize, 8);
   }
 } // designs how the palette looks like on the UI sidebar
 function drawLoadingBar(progress) {
